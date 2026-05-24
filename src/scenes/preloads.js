@@ -13,6 +13,9 @@ export class Preloads extends Phaser.Scene { // Se extiende de Phaser.Scene porq
         this.load.image('ground', 'public/assets/images/platform.png');
         this.load.image('star', 'public/assets/images/star.png');
         this.load.image('bomb', 'public/assets/images/bomb.png');
+        this.load.image('square_red', 'public/assets/images/square_red.png');
+        this.load.image('square_blue', 'public/assets/images/square_blue.png');
+        this.load.image('square_yellow', 'public/assets/images/square_yellow.png');
         this.load.spritesheet('dude', 'public/assets/images/dude.png', { frameWidth: 32, frameHeight: 48 });
     }
 
