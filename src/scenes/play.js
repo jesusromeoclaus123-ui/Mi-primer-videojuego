@@ -8,6 +8,8 @@ var cursors;
 var score = 0;
 var gameOver = false;
 var scoreText;
+var timerText;
+var timeLeft = 30;
 
 // Clase Play, donde se crean todos los sprites, el escenario del juego y se inicializa y actualiza toda la logica del juego.
 export class Play extends Phaser.Scene {
@@ -17,12 +19,30 @@ export class Play extends Phaser.Scene {
   }
 
   create() {
+
     // Reiniciamos el GameOver para que el jugador pueda moverse libremente
     gameOver = false;
+
     // Reseteamos el score a 0
     score = 0;
+
+    // Reiniciamos el tiempo
+    timeLeft = 30;
+
     //  A simple background for our game
     this.add.image(400, 300, "sky");
+
+    // Texto del score
+    scoreText = this.add.text(16, 16, "Score: 0", {
+        fontSize: "32px",
+        fill: "#000",
+    });
+
+    // Texto del tiempo
+    timerText = this.add.text(16, 50, "Tiempo: 30", {
+        fontSize: "32px",
+        fill: "#000",
+    });
 
     //  The platforms group contains the ground and the 2 ledges we can jump on
     platforms = this.physics.add.staticGroup();
@@ -70,7 +90,6 @@ export class Play extends Phaser.Scene {
     //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
     stars = this.physics.add.group();
 
-  stars = this.physics.add.group();
 
 const itemTypes = ["square_red", "triangle_blue", "diamond_yellow"];
 
@@ -120,8 +139,32 @@ this.time.addEvent({
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, this.collectStar, null, this);
+    this.time.addEvent({
+    delay: 1000,
 
-    this.physics.add.collider(player, bombs, this.hitBomb, null, this);
+    callback: () => {
+
+        if (gameOver) {
+            return;
+        }
+
+        timeLeft--;
+
+        timerText.setText("Tiempo: " + timeLeft);
+
+        if (timeLeft <= 0) {
+
+            gameOver = true;
+
+            alert("PERDISTE");
+
+        }
+
+    },
+
+    callbackScope: this,
+    loop: true
+});
   }
 
   update() {
