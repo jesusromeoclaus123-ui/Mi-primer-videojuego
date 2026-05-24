@@ -2,6 +2,7 @@
 var player;
 var stars;
 var bombs;
+var collectedItems = [];
 var platforms;
 var cursors;
 var score = 0;
@@ -67,11 +68,37 @@ export class Play extends Phaser.Scene {
     cursors = this.input.keyboard.createCursorKeys();
 
     //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
-    stars = this.physics.add.group({
-      key: "star",
-      repeat: 11,
-      setXY: { x: 12, y: 0, stepX: 70 },
-    });
+    stars = this.physics.add.group();
+
+  stars = this.physics.add.group();
+
+const itemTypes = ["square_red", "triangle_blue", "diamond_yellow"];
+
+this.time.addEvent({
+  delay: 1000,
+  callback: () => {
+
+    let randomType = Phaser.Utils.Array.GetRandom(itemTypes);
+
+    let star = stars.create(
+      Phaser.Math.Between(50, 750),
+      0,
+      randomType
+    );
+
+    star.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+
+    if (randomType === "square_red") {
+      star.setScale(0.15);
+    }
+    else {
+      star.setScale(0.05);
+    }
+
+  },
+  callbackScope: this,
+  loop: true
+});
 
     stars.children.iterate(function (child) {
       //  Give each star a slightly different bounce
@@ -122,30 +149,42 @@ export class Play extends Phaser.Scene {
   }
 
   collectStar(player, star) {
+
     star.disableBody(true, true);
 
-    //  Add and update the score
-    score += 10;
-    scoreText.setText("Score: " + score);
+    collectedItems.push(star.texture.key);
 
-    if (stars.countActive(true) === 0) {
-      //  A new batch of stars to collect
-      stars.children.iterate(function (child) {
-        child.enableBody(true, child.x, 0, true, true);
-      });
+    console.log(collectedItems);
 
-      var x =
-        player.x < 400
-          ? Phaser.Math.Between(400, 800)
-          : Phaser.Math.Between(0, 400);
+    let squares = collectedItems.filter(
+        item => item === "square_red"
+    ).length;
 
-      var bomb = bombs.create(x, 16, "bomb");
-      bomb.setBounce(1);
-      bomb.setCollideWorldBounds(true);
-      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+    let triangles = collectedItems.filter(
+        item => item === "triangle_blue"
+    ).length;
+
+    let diamonds = collectedItems.filter(
+        item => item === "diamond_yellow"
+    ).length;
+
+    console.log("Cuadrados:", squares);
+    console.log("Triangulos:", triangles);
+    console.log("Rombos:", diamonds);
+
+    if (
+        squares >= 2 &&
+        triangles >= 2 &&
+        diamonds >= 2
+    ) {
+
+        gameOver = true;
+
+        alert("GANASTE!");
+
     }
-  }
 
+}
   hitBomb(player, bomb) {
     this.physics.pause();
 
