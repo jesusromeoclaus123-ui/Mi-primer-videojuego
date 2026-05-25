@@ -101,7 +101,7 @@ const itemTypes = [
 ];
 
 this.time.addEvent({
-  delay: 1000,
+  delay: 500,
   callback: () => {
 
     let randomType = Phaser.Utils.Array.GetRandom(itemTypes);
@@ -111,7 +111,18 @@ this.time.addEvent({
       0,
       randomType
     );
+    star.points = 20;
+    if (randomType === "square_red") {
+    star.points = 10;
+}
 
+if (randomType === "triangle_blue") {
+    star.points = 20;
+}
+
+if (randomType === "diamond_yellow") {
+    star.points = 30;
+}
     star.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
 
 if (randomType === "square_red") {
@@ -137,13 +148,21 @@ else {
 
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
-    this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(stars, platforms, (star) => {
+
+    star.points -= 5;
+
+    if (star.points <= 0) {
+        star.disableBody(true, true);
+    }
+
+});
     this.physics.add.collider(bombs, platforms);
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, this.collectStar, null, this);
     this.time.addEvent({
-    delay: 1000,
+    delay: 500,
 
 callback: () => {
 
@@ -222,18 +241,7 @@ collectStar(player, star) {
 
     console.log(collectedItems);
 
-    if (star.texture.key === "square_red") {
-        score += 10;
-    }
-
-    if (star.texture.key === "triangle_blue") {
-        score += 20;
-    }
-
-    if (star.texture.key === "diamond_yellow") {
-        score += 30;
-    }
-
+score += star.points;
 scoreText.setText("Score: " + score);
 
 if (score >= 100) {
