@@ -52,9 +52,11 @@ export class Play extends Phaser.Scene {
     platforms.create(400, 568, "ground").setScale(2).refreshBody();
 
     //  Now let's create some ledges
-    platforms.create(600, 400, "ground");
+    platforms.create(600, 450, "ground");
     platforms.create(50, 250, "ground");
-    platforms.create(750, 220, "ground");
+    platforms.create(750, 290, "ground");
+    platforms.create(300, 130, "ground");
+    platforms.create(200, 340, "ground");
 
     // The player and its settings
     player = this.physics.add.sprite(100, 450, "dude");
@@ -126,12 +128,6 @@ this.time.addEvent({
 
     bombs = this.physics.add.group();
 
-    //  The score
-    scoreText = this.add.text(16, 16, "score: 0", {
-      fontSize: "32px",
-      fill: "#000",
-    });
-
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
@@ -142,28 +138,31 @@ this.time.addEvent({
     this.time.addEvent({
     delay: 1000,
 
-    callback: () => {
+callback: () => {
 
-        if (gameOver) {
-            return;
-        }
+    if (gameOver) {
+        return;
+    }
 
-        timeLeft--;
+    timeLeft--;
 
-        timerText.setText("Tiempo: " + timeLeft);
+    timerText.setText("Tiempo: " + timeLeft);
 
-        if (timeLeft <= 0) {
+    if (timeLeft <= 0) {
 
-            gameOver = true;
+        gameOver = true;
 
-            alert("PERDISTE");
+        this.scene.start("Retry", {
+            score: score,
+            result: "PERDISTE"
+        });
 
-        }
+    }
 
-    },
+},
 
-    callbackScope: this,
-    loop: true
+callbackScope: this,
+loop: true
 });
   }
 
@@ -199,34 +198,34 @@ this.time.addEvent({
 
     console.log(collectedItems);
 
-    let squares = collectedItems.filter(
-        item => item === "square_red"
-    ).length;
+if (star.texture.key === "square_red") {
+    score += 10;
+}
 
-    let triangles = collectedItems.filter(
-        item => item === "triangle_blue"
-    ).length;
+if (star.texture.key === "triangle_blue") {
+    score += 20;
+}
 
-    let diamonds = collectedItems.filter(
-        item => item === "diamond_yellow"
-    ).length;
+if (star.texture.key === "diamond_yellow") {
+    score += 30;
+}
 
-    console.log("Cuadrados:", squares);
-    console.log("Triangulos:", triangles);
-    console.log("Rombos:", diamonds);
+scoreText.setText("Score: " + score);
 
-    if (
-        squares >= 2 &&
-        triangles >= 2 &&
-        diamonds >= 2
-    ) {
+if (score >= 100) {
 
-        gameOver = true;
+    gameOver = true;
 
-        alert("GANASTE!");
+    setTimeout(() => {
 
-    }
+    this.scene.start("Retry", {
+        score: score,
+        result: "GANASTE"
+    });
 
+}, 100);
+
+}
 }
   hitBomb(player, bomb) {
     this.physics.pause();
