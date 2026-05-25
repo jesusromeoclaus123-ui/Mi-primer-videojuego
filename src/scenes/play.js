@@ -93,7 +93,12 @@ export class Play extends Phaser.Scene {
     stars = this.physics.add.group();
 
 
-const itemTypes = ["square_red", "triangle_blue", "diamond_yellow"];
+const itemTypes = [
+    "square_red",
+    "triangle_blue",
+    "diamond_yellow",
+    "bomb"
+];
 
 this.time.addEvent({
   delay: 1000,
@@ -109,13 +114,15 @@ this.time.addEvent({
 
     star.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
 
-    if (randomType === "square_red") {
-      star.setScale(0.15);
-    }
-    else {
-      star.setScale(0.05);
-    }
-
+if (randomType === "square_red") {
+    star.setScale(0.15);
+}
+else if (randomType === "bomb") {
+    star.setScale(1);
+}
+else {
+    star.setScale(0.05);
+}
   },
   callbackScope: this,
   loop: true
@@ -190,25 +197,42 @@ loop: true
     }
   }
 
-  collectStar(player, star) {
+collectStar(player, star) {
 
+    // SI ES BOMBA
+    if (star.texture.key === "bomb") {
+
+        star.disableBody(true, true);
+
+        score -= 20;
+
+        if (score < 0) {
+            score = 0;
+        }
+
+        scoreText.setText("Score: " + score);
+
+        return;
+    }
+
+    // OBJETOS NORMALES
     star.disableBody(true, true);
 
     collectedItems.push(star.texture.key);
 
     console.log(collectedItems);
 
-if (star.texture.key === "square_red") {
-    score += 10;
-}
+    if (star.texture.key === "square_red") {
+        score += 10;
+    }
 
-if (star.texture.key === "triangle_blue") {
-    score += 20;
-}
+    if (star.texture.key === "triangle_blue") {
+        score += 20;
+    }
 
-if (star.texture.key === "diamond_yellow") {
-    score += 30;
-}
+    if (star.texture.key === "diamond_yellow") {
+        score += 30;
+    }
 
 scoreText.setText("Score: " + score);
 
@@ -228,21 +252,14 @@ if (score >= 100) {
 }
 }
   hitBomb(player, bomb) {
-    this.physics.pause();
 
-    player.setTint(0xff0000);
+    bomb.disableBody(true, true);
 
-    player.anims.play("turn");
+    score -= 20;
 
-    gameOver = true;
-
-    // Función timeout usada para llamar la instrucción que tiene adentro despues de X milisegundos
-    setTimeout(() => {
-      // Instrucción que sera llamada despues del segundo
-      this.scene.start(
-        "Retry",
-        { score: score } // se pasa el puntaje como dato a la escena RETRY
-      );
-    }, 1000); // Ese número es la cantidad de milisegundos
+    if (score < 0) {
+        score = 0;
+    }
+    scoreText.setText("Score: " + score);
   }
 }
